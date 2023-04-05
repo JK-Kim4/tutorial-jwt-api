@@ -20,6 +20,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+//토큰 생성
+//토큰 권한 확인
+//토큰 유효성 검사
 @Component
 public class TokenProvider implements InitializingBean {
 
