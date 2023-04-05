@@ -41,12 +41,15 @@ public class TokenProvider implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        //Base64인코딩 String key값을 디코딩 후 byte[] 변환
         byte[] keyByte = Decoders.BASE64.decode(secret);
+        //앞전에 생성된 byte 배열 key값을 사용하여 Key객체 초기화
         this.key = Keys.hmacShaKeyFor(keyByte);
     }
 
     /*Authentication 권한 정보를 이용하여 Token 객체 생성*/
     public String createToken(Authentication authentication){
+     
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -55,10 +58,21 @@ public class TokenProvider implements InitializingBean {
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
         return Jwts.builder()
+                //.setHeaderParam("foo", "bar") JWT의 claims와 관련된 컨텐츠, 형식, 암호화 작업에 대한 메타데이터를 제공
                 .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .setExpiration(validity)
+                .claim(AUTHORITIES_KEY, authorities) // claim이란 JWT의 body이고 JWT 생성자가 JWT를 받는이들에게 제시하기 바라는 정보를 포함한다.
+            /*
+                    JwtBuilder는 JWT스펙에 정의한 기본으로 등록된 Cliam names에 대해서 다음과 같은 편리한 setter 메서드를 제공한다.
+                setIssuer: iss (Issuer) Claim
+                setSubject: sub (Subject) Claim
+                setAudience: aud (Audience) Claim
+                setExpiration: exp (Expiration Time) Claim
+                setNotBefore: nbf (Not Before) Claim
+                setIssuedAt: iat (Issued At) Claim
+                setId: jit(JWT ID) Claim
+            */
+                .signWith(key, SignatureAlgorithm.HS512) // JwtBuilder의 signWith 메소드를 호출하여 sign key를 지정하고, JJWT가 지정된 key에 허용된 가장 안전한 알고리즘을 결정하도록 하는게 좋다
+                .setExpiration(validity) // 토큰 만료 기간 설정
                 .compact();
     }
 
