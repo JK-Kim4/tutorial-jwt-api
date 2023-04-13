@@ -50,6 +50,8 @@ public class JwtFilter extends GenericFilterBean {
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
             return bearerToken.substring(7);
         }
+
+        //TODO 일치하는 토큰 정보 없을 경우 기록
         return null;
     }
 }
